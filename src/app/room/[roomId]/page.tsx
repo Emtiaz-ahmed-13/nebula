@@ -38,9 +38,13 @@ const Page = () => {
   });
 
   const initialDuration = ttlData?.initialTtl
-    ? ttlData.initialTtl >= 1440
-      ? `${Math.ceil(ttlData.initialTtl / 1440)} day${
-          Math.ceil(ttlData.initialTtl / 1440) > 1 ? "s" : ""
+    ? ttlData.initialTtl >= 86400 // 86400 seconds = 24 hours
+      ? `${Math.ceil(ttlData.initialTtl / 86400)} day${
+          Math.ceil(ttlData.initialTtl / 86400) > 1 ? "s" : ""
+        }`
+      : ttlData.initialTtl >= 3600 // 3600 seconds = 1 hour
+      ? `${Math.ceil(ttlData.initialTtl / 3600)} hr${
+          Math.ceil(ttlData.initialTtl / 3600) > 1 ? "s" : ""
         }`
       : `${Math.ceil(ttlData.initialTtl / 60)} min`
     : "N/A";
@@ -114,9 +118,13 @@ const Page = () => {
 
     // Calculate duration text when function is called to ensure we have the latest value
     const durationText = ttlData?.initialTtl
-      ? ttlData.initialTtl >= 1440
-        ? `${Math.ceil(ttlData.initialTtl / 1440)} day${
-            Math.ceil(ttlData.initialTtl / 1440) > 1 ? "s" : ""
+      ? ttlData.initialTtl >= 86400 // 86400 seconds = 24 hours
+        ? `${Math.ceil(ttlData.initialTtl / 86400)} day${
+            Math.ceil(ttlData.initialTtl / 86400) > 1 ? "s" : ""
+          }`
+        : ttlData.initialTtl >= 3600 // 3600 seconds = 1 hour
+        ? `${Math.ceil(ttlData.initialTtl / 3600)} hr${
+            Math.ceil(ttlData.initialTtl / 3600) > 1 ? "s" : ""
           }`
         : `${Math.ceil(ttlData.initialTtl / 60)} min`
       : "N/A";
@@ -140,6 +148,8 @@ const Page = () => {
           text: shareText,
           url: url,
         });
+        // Reset status after successful sharing
+        setTimeout(() => setCopyStatus("COPY"), 2000);
         return;
       } catch (err) {
         // If share fails (e.g., user cancels), fallback to clipboard
@@ -161,9 +171,22 @@ const Page = () => {
   };
 
   const shareToFacebook = () => {
+    // Calculate duration text for Facebook share to ensure we have the latest value
+    const durationText = ttlData?.initialTtl
+      ? ttlData.initialTtl >= 86400 // 86400 seconds = 24 hours
+        ? `${Math.ceil(ttlData.initialTtl / 86400)} day${
+            Math.ceil(ttlData.initialTtl / 86400) > 1 ? "s" : ""
+          }`
+        : ttlData.initialTtl >= 3600 // 3600 seconds = 1 hour
+        ? `${Math.ceil(ttlData.initialTtl / 3600)} hr${
+            Math.ceil(ttlData.initialTtl / 3600) > 1 ? "s" : ""
+          }`
+        : `${Math.ceil(ttlData.initialTtl / 60)} min`
+      : "N/A";
+
     const url = encodeURIComponent(window.location.href);
     const text = encodeURIComponent(
-      `Join my secure, self-destructing chat room! Expires in ${initialDuration}`
+      `Join my secure, self-destructing chat room! Expires in ${durationText}`
     );
     window.open(
       `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`,
