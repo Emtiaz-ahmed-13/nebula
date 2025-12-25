@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://nebula-chat.vercel.app",
+    url: "https://nebula-nu-wine.vercel.app/",
     title: "Nebula Chat | Secure, Self-Destructing Private Conversations",
     description: "Nebula Chat is a secure, privacy-focused messaging platform where conversations automatically self-destruct after a set duration.",
     siteName: "Nebula Chat",
