@@ -156,6 +156,7 @@ function Lobby() {
                     <option value={15}>15 minutes</option>
                     <option value={30}>30 minutes</option>
                     <option value={60}>1 hour</option>
+                    <option value={1440}>1 day (24 hours)</option>
                   </select>
                 </div>
                 <button

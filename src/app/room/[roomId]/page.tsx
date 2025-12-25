@@ -38,7 +38,11 @@ const Page = () => {
   });
 
   const initialDuration = ttlData?.initialTtl
-    ? `${Math.ceil(ttlData.initialTtl / 60)} min`
+    ? ttlData.initialTtl >= 1440
+      ? `${Math.ceil(ttlData.initialTtl / 1440)} day${
+          Math.ceil(ttlData.initialTtl / 1440) > 1 ? "s" : ""
+        }`
+      : `${Math.ceil(ttlData.initialTtl / 60)} min`
     : "N/A";
 
   useEffect(() => {
@@ -108,12 +112,32 @@ const Page = () => {
   const copyLink = async () => {
     const url = window.location.href;
 
+    // Calculate duration text when function is called to ensure we have the latest value
+    const durationText = ttlData?.initialTtl
+      ? ttlData.initialTtl >= 1440
+        ? `${Math.ceil(ttlData.initialTtl / 1440)} day${
+            Math.ceil(ttlData.initialTtl / 1440) > 1 ? "s" : ""
+          }`
+        : `${Math.ceil(ttlData.initialTtl / 60)} min`
+      : "N/A";
+
+    const shareText = `Join my secure, self-destructing chat room! Expires in ${durationText}`;
+
     // Try to use the modern share API if available, otherwise fallback to clipboard
-    if (navigator.share) {
+    if (
+      navigator.share &&
+      navigator.canShare &&
+      navigator.canShare({
+        title: "Private Chat Room",
+        text: shareText,
+        url: url,
+      })
+    ) {
       try {
+        setCopyStatus("SHARING...");
         await navigator.share({
           title: "Private Chat Room",
-          text: "Join my secure, self-destructing chat room!",
+          text: shareText,
           url: url,
         });
         return;
@@ -125,14 +149,27 @@ const Page = () => {
 
     // Fallback to clipboard copy
     try {
+      setCopyStatus("COPYING...");
       await navigator.clipboard.writeText(url);
       setCopyStatus("COPIED!");
       setTimeout(() => setCopyStatus("COPY"), 2000);
     } catch (err) {
       console.error("Failed to copy: ", err);
       setCopyStatus("FAILED");
-      setTimeout(() => setCopyStatus("COPY"), 2000);
+      setTimeout(() => setCopyStatus("COPY"), 3000);
     }
+  };
+
+  const shareToFacebook = () => {
+    const url = encodeURIComponent(window.location.href);
+    const text = encodeURIComponent(
+      `Join my secure, self-destructing chat room! Expires in ${initialDuration}`
+    );
+    window.open(
+      `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
   };
 
   return (
@@ -145,20 +182,31 @@ const Page = () => {
               <span className="font-bold text-green-500 truncate">
                 {roomId.slice(0, 10) + "..."}
               </span>
-              <button
-                onClick={copyLink}
-                className="text-[10px] bg-zinc-800 hover:bg-zinc-700 px-2 py-0.5 rounded text-zinc-400 hover:text-zinc-200 transition-colors flex items-center gap-1"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-3 w-3"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={shareToFacebook}
+                  className="text-xs bg-zinc-800 hover:bg-blue-600 px-3 py-1 rounded text-zinc-400 hover:text-white transition-colors flex items-center gap-1 font-medium"
+                  title="Share on Facebook"
                 >
-                  <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
-                </svg>
-                {copyStatus}
-              </button>
+                  <span className="text-blue-500">📘</span>
+                  <span>Facebook</span>
+                </button>
+                <button
+                  onClick={copyLink}
+                  className="text-xs bg-zinc-800 hover:bg-green-600 px-3 py-1 rounded text-zinc-400 hover:text-white transition-colors flex items-center gap-1 font-medium"
+                  title="Copy room link"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-3.5 w-3.5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
+                  </svg>
+                  <span>{copyStatus}</span>
+                </button>
+              </div>
             </div>
           </div>
 
